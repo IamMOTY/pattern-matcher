@@ -13,8 +13,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(Filesystem REQUIRED)
 
 # XML parsing subproject
-add_subdirectory(xml)
-# add_library(xml_lib ALIAS pugixml)
+add_subdirectory(xml/pugixml)
+ add_library(xml_lib ALIAS pugixml)
 
 # Inlcude directories
 set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include)
