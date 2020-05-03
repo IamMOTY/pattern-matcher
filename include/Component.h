@@ -4,6 +4,7 @@
 #include <istream>
 #include <string>
 #include <cmath>
+#include "Time.h"
 
 enum class InstrumentType : char {
     C = 'C',
@@ -20,6 +21,21 @@ struct Component {
     static Component from_string(const std::string &);
 
     static bool testOptions(const InstrumentType&);
+
+    bool operator== (Component val) const {
+        return (this->ratio == val.ratio && this->strike == val.strike && Time::comp(this->expiration, val.expiration) == 0);
+    };
+    bool operator!= (Component val) const {
+        return (this->ratio != val.ratio || this->strike != val.strike || Time::comp(this->expiration, val.expiration) != 0);
+    };
+    bool operator> (Component val) const {
+        return this->ratio > val.ratio;
+    };
+    bool operator< (Component val) const {
+        return this->ratio < val.ratio;
+    };
+
+
 
     InstrumentType type{InstrumentType::Unknown};
     double ratio{0};

@@ -34,6 +34,11 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
             return false;
         }
     }
+    order.clear();
+    for(int k = 0; k < templateCombination.count; k++) {
+        order.emplace_back(k);
+    }
+
     int end = 1;
     for (int i = 2; i <= templateCombination.count; end *= i++);
     for (int i = 0; i < end; i++) {
@@ -50,9 +55,9 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
                 if (templateString.size() == 1 && isupper(templateString[0]) ||
                     !templateString.empty() && templateString[0] == '+') {
                     if (Time::comp(check[templateString], def) == 0) {
-                        check[templateString] = fixed[k].expiration;
+                        check[templateString] = fixed[order[k]].expiration;
                     } else {
-                        if (Time::comp(check[templateString], fixed[k].expiration) != 0) {
+                        if (Time::comp(check[templateString], fixed[order[k]].expiration) != 0) {
                             flag = false;
                             continue;
                         }
@@ -72,7 +77,7 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
                         std::string prevTemplateString = templateCombination.legs[k - 1].expiration;
                         if ((prevTemplateString.size() == 1 && isupper(prevTemplateString[0]) ||
                              prevTemplateString.empty() || prevTemplateString < templateString) &&
-                            Time::comp(fixed[k].expiration, fixed[k - 1].expiration) == -1) {
+                            Time::comp(fixed[order[k]].expiration, fixed[order[k] - 1].expiration) == -1) {
                             flag = false;
                             continue;
                         }
@@ -92,16 +97,16 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
                         int test;
                         switch (templateString.back()) {
                             case 'q':
-                                test = Time::diffInQuart(saved, fixed[k].expiration);
+                                test = Time::diffInQuart(saved, fixed[order[k]].expiration);
                                 break;
                             case 'm':
-                                test = Time::diffInMonth(saved, fixed[k].expiration);
+                                test = Time::diffInMonth(saved, fixed[order[k]].expiration);
                                 break;
                             case 'd':
-                                test = Time::diffInDays(saved, fixed[k].expiration);
+                                test = Time::diffInDays(saved, fixed[order[k]].expiration);
                                 break;
                             case 'y':
-                                test = Time::diffInYears(saved, fixed[k].expiration);
+                                test = Time::diffInYears(saved, fixed[order[k]].expiration);
                         }
                         if (count != test) {
                             flag = false;
@@ -116,14 +121,14 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
         if (flag) {
             std::map<std::string, double> check;
             for (int k = 0; k < templateCombination.count && flag; k++) {
-                if (Component::testOptions(fixed[k].type)) {
+                if (Component::testOptions(fixed[order[k]].type)) {
                     std::string templateString = templateCombination.legs[k].strike;
                     if (templateString.size() == 1 && isupper(templateString[0]) ||
                         !templateString.empty() && templateString[0] == '+' || templateString[0] == '-') {
                         if (check[templateString] == 0) {
-                            check[templateString] = fixed[k].strike;
+                            check[templateString] = fixed[order[k]].strike;
                         } else {
-                            if (std::abs(check[templateString] - fixed[k].strike) > 1e-7) {
+                            if (std::abs(check[templateString] - fixed[order[k]].strike) > 1e-7) {
                                 flag = false;
                                 continue;
                             }
@@ -136,16 +141,16 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
         if (flag) {
             double saved;
             for (int k = 0; k < templateCombination.count && flag; k++) {
-                if (Component::testOptions(fixed[k].type)) {
+                if (Component::testOptions(fixed[order[k]].type)) {
                     std::string templateString = templateCombination.legs[k].strike;
                     if (templateString.size() == 1 && isupper(templateString[0]) || templateString.empty()) {
-                        saved = combination[k].strike;
+                        saved = fixed[order[k]].strike;
                     } else {
                         if (templateString[0] == '+') {
                             std::string prevTemplateString = templateCombination.legs[k - 1].strike;
                             if ((prevTemplateString.size() == 1 && isupper(prevTemplateString[0]) ||
                                  prevTemplateString.empty() || prevTemplateString < templateString) &&
-                                fixed[k].strike > fixed[k - 1].strike) {
+                                fixed[order[k]].strike > fixed[order[k] - 1].strike) {
                                 flag = false;
                                 continue;
                             }
@@ -154,7 +159,7 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
                             std::string prevTemplateString = templateCombination.legs[k - 1].strike;
                             if ((prevTemplateString.size() == 1 && isupper(prevTemplateString[0]) ||
                                  prevTemplateString.empty() || prevTemplateString < templateString) &&
-                                fixed[k].strike > fixed[k - 1].strike) {
+                                fixed[order[k]].strike > fixed[order[k] - 1].strike) {
                                 flag = false;
                                 continue;
                             }
@@ -165,20 +170,21 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
         }
 
         if (flag) {
-            std::map<Component, TemplateComponent> componentToTemplate;
-            std::map<TemplateComponent, int> templateToNumber;
-            for (int k = 0; k < templateCombination.count; k++) {
-                templateToNumber[templateCombination.legs[k]] = k + 1;
-                componentToTemplate[fixed[k]] = templateCombination.legs[k];
-            }
 
+            std::vector<int> temp = order;
+            order.clear();
             for (auto c: combination) {
-                order.emplace_back(templateToNumber[componentToTemplate[c]]);
+                for (int k = 0; k < templateCombination.count; k++) {
+                    if (c == fixed[temp[k]]) {
+                        order.emplace_back(k + 1);
+                        break;
+                    }
+                }
             }
             return true;
         }
 
-        std::next_permutation(fixed.begin(), fixed.end());
+        std::next_permutation(order.begin(), order.end());
     }
     return false;
 }

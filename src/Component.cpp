@@ -57,3 +57,6 @@ Component Component::from_string(const std::string & str)
 bool Component::testOptions(const InstrumentType &value) {
     return value == InstrumentType::O || value == InstrumentType::P || value == InstrumentType::C;
 }
+
+
+
