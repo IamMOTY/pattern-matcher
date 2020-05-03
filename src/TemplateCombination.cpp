@@ -18,7 +18,7 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
         return false;
     }
     if (templateCombination.cardinalityType == CardinalityType::MORE &&
-        combination.size() >= templateCombination.count) {
+        combination.size() < templateCombination.count) {
         return false;
     }
 
@@ -170,7 +170,6 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
         }
 
         if (flag) {
-
             std::vector<int> temp = order;
             order.clear();
             for (auto c: combination) {
