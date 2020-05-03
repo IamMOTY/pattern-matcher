@@ -2,13 +2,13 @@
 
 
 int Time::comp(std::tm first, std::tm second) {
-    if (std::difftime(mktime(&first), mktime(&second)) < 0) {
+    if (Time::diffInDays(first, second) < 0) {
         return -1;
     }
-    if (std::difftime(mktime(&first), mktime(&second)) == 0) {
+    if (Time::diffInDays(first, second) == 0) {
         return 0;
     }
-    if (std::difftime(mktime(&first), mktime(&second)) > 0) {
+    if (Time::diffInDays(first, second) > 0) {
         return 1;
     }
 }

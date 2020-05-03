@@ -35,17 +35,33 @@ TemplateComponent::TemplateComponent() {
 };
 
 bool TemplateComponent::match(const TemplateComponent &templateComponent, Component component) {
-    return !(templateComponent.instrumentType == InstrumentType::O &&
-             component.type != InstrumentType::O &&
-             component.type != InstrumentType::C &&
-             component.type != InstrumentType::P ||
-             templateComponent.instrumentType == InstrumentType::U &&
-             component.type != InstrumentType::U &&
-             component.type != InstrumentType::F ||
-             templateComponent.instrumentType != component.type ||
-             templateComponent.ratio == "-" &&
-             component.ratio > 0 ||
-             templateComponent.ratio == "+" &&
-             component.ratio < 0 ||
-             std::abs(std::stod(templateComponent.ratio) - component.ratio) > 1e-7);
+    if (templateComponent.instrumentType == InstrumentType::O) {
+        if (component.type != InstrumentType::O &&
+            component.type != InstrumentType::C &&
+            component.type != InstrumentType::P) {
+            return false;
+        }
+    } else if (templateComponent.instrumentType == InstrumentType::U) {
+        if (component.type != InstrumentType::U &&
+            component.type != InstrumentType::F) {
+            return false;
+        }
+    } else if (templateComponent.instrumentType != component.type) {
+        return false;
+    }
+
+    if (templateComponent.ratio == "-" && component.ratio > 0) {
+        return false;
+    }
+
+    if (templateComponent.ratio == "+" && component.ratio < 0) {
+        return false;
+    }
+
+    if ((isdigit(templateComponent.ratio[0]) || templateComponent.ratio.size() > 1) &&
+        std::abs(std::stod(templateComponent.ratio) - component.ratio) > 1e-7) {
+        return false;
+    }
+
+    return true;
 }

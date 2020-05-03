@@ -4,7 +4,26 @@
 #include <set>
 #include <algorithm>
 #include <Time.h>
+#include <unordered_set>
 
+namespace {
+    void getUniqueVector(std::vector<Component> &input) {
+        std::vector<Component> temp;
+        std::vector<int> check(input.size(), 1);
+        for (int i = 0; i < input.size(); i++) {
+            if (check[i]) {
+                temp.emplace_back(input[i]);
+                check[i] = 0;
+                for (int j = i + 1; j < input.size(); j++) {
+                    if (input[i] == input[j]) {
+                        check[j] = 0;
+                    }
+                }
+            }
+        }
+        input = temp;
+    };
+}
 
 bool
 TemplateCombination::match(const TemplateCombination &templateCombination, const std::vector<Component> &combination,
@@ -12,6 +31,11 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
     if (templateCombination.cardinalityType == CardinalityType::FIXED &&
         combination.size() != templateCombination.count) {
         return false;
+    }
+    if (templateCombination.identifier == "d60e378c-575b-11df-80da-6b7a129b2e6e") {
+
+        int c = 55;
+
     }
     if (templateCombination.cardinalityType == CardinalityType::MULTIPLE &&
         combination.size() % templateCombination.count != 0) {
@@ -23,13 +47,24 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
     }
 
     if (templateCombination.cardinalityType == CardinalityType::MORE) {
-        return TemplateComponent::match(templateCombination.legs[0], combination[0]);
+        bool flag = true;
+        order.clear();
+        for (int j = 0; j < combination.size(); j++) {
+            flag = flag && TemplateComponent::match(templateCombination.legs[0], combination[j]);
+            order.emplace_back(j + 1);
+        }
+        if (!flag) {
+            order.clear();
+        }
+        return flag;
     }
+
+
+
 
     std::vector<Component> fixed = combination;
     if (templateCombination.cardinalityType == CardinalityType::MULTIPLE) {
-        std::set<Component> temp(fixed.begin(), fixed.end());
-        fixed = std::vector<Component>(temp.begin(), temp.end());
+        getUniqueVector(fixed);
         if (fixed.size() != templateCombination.count) {
             return false;
         }
@@ -71,19 +106,23 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
             for (int k = 0; k < templateCombination.count && flag; k++) {
                 std::string templateString = templateCombination.legs[k].expiration;
                 if (templateString.size() == 1 && isupper(templateString[0]) || templateString.empty()) {
-                    saved = combination[k].expiration;
+                    saved = fixed[order[k]].expiration;
                 } else {
                     if (templateString[0] == '+') {
                         std::string prevTemplateString = templateCombination.legs[k - 1].expiration;
                         if ((prevTemplateString.size() == 1 && isupper(prevTemplateString[0]) ||
                              prevTemplateString.empty() || prevTemplateString < templateString) &&
-                            Time::comp(fixed[order[k]].expiration, fixed[order[k] - 1].expiration) == -1) {
+                            Time::comp(fixed[order[k - 1]].expiration, fixed[order[k]].expiration) <= 0) {
                             flag = false;
                             continue;
                         }
                     }
                     if (templateString.back() == 'q' || templateString.back() == 'm' ||
                         templateString.back() == 'y' || templateString.back() == 'd') {
+                        if (Time::comp(saved, fixed[order[k]].expiration) == -1) {
+                            flag = false;
+                            continue;
+                        }
                         std::string temp;
                         for (char c:templateString) {
                             if (isdigit(c)) {
@@ -150,7 +189,7 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
                             std::string prevTemplateString = templateCombination.legs[k - 1].strike;
                             if ((prevTemplateString.size() == 1 && isupper(prevTemplateString[0]) ||
                                  prevTemplateString.empty() || prevTemplateString < templateString) &&
-                                fixed[order[k]].strike > fixed[order[k] - 1].strike) {
+                                fixed[order[k]].strike <= fixed[order[k - 1]].strike) {
                                 flag = false;
                                 continue;
                             }
@@ -159,7 +198,7 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
                             std::string prevTemplateString = templateCombination.legs[k - 1].strike;
                             if ((prevTemplateString.size() == 1 && isupper(prevTemplateString[0]) ||
                                  prevTemplateString.empty() || prevTemplateString < templateString) &&
-                                fixed[order[k]].strike > fixed[order[k] - 1].strike) {
+                                fixed[order[k]].strike >= fixed[order[k - 1]].strike) {
                                 flag = false;
                                 continue;
                             }
@@ -172,10 +211,11 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
         if (flag) {
             std::vector<int> temp = order;
             order.clear();
+            std::vector<int> count(fixed.size(),0);
             for (auto c: combination) {
                 for (int k = 0; k < templateCombination.count; k++) {
                     if (c == fixed[temp[k]]) {
-                        order.emplace_back(k + 1);
+                        order.emplace_back(k + 1 + fixed.size() * count[k]++);
                         break;
                     }
                 }
@@ -198,14 +238,16 @@ int TemplateCombination::parse(pugi::xml_node node, TemplateCombination &templat
     } else {
         return -1;
     }
-    if (templateCombination.cardinalityType == CardinalityType::FIXED) {
+    if (templateCombination.cardinalityType == CardinalityType::MORE) {
         templateCombination.count = std::stoi(node.attribute("mincount").value());
     }
     for (pugi::xml_node leg: node.children("leg")) {
         TemplateComponent templateComponent;
         if (TemplateComponent::parse(leg, templateComponent) == -1) return -1;
         templateCombination.legs.emplace_back(templateComponent);
-        templateCombination.count++;
+    }
+    if (templateCombination.cardinalityType != CardinalityType::MORE) {
+        templateCombination.count = templateCombination.legs.size();
     }
     return templateCombination.count;
 }

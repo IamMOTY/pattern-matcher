@@ -23,10 +23,10 @@ struct Component {
     static bool testOptions(const InstrumentType&);
 
     bool operator== (Component val) const {
-        return (this->ratio == val.ratio && this->strike == val.strike && Time::comp(this->expiration, val.expiration) == 0);
+        return this->type == val.type && this->ratio == val.ratio && this->strike == val.strike && Time::comp(this->expiration, val.expiration) == 0;
     };
     bool operator!= (Component val) const {
-        return (this->ratio != val.ratio || this->strike != val.strike || Time::comp(this->expiration, val.expiration) != 0);
+        return this->type != val.type ||this->ratio != val.ratio || this->strike != val.strike || Time::comp(this->expiration, val.expiration) != 0;
     };
     bool operator> (Component val) const {
         return this->ratio > val.ratio;
