@@ -44,7 +44,7 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
     for (int i = 0; i < end; i++) {
         bool flag = true;
         for (int j = 0; j < templateCombination.count; j++) {
-            flag = flag && TemplateComponent::match(templateCombination.legs[j], fixed[j]);
+            flag = flag && TemplateComponent::match(templateCombination.legs[j], fixed[order[j]]);
         }
 
         if (flag) {
