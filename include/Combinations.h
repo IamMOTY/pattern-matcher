@@ -3,8 +3,12 @@
 #include <filesystem>
 #include <string>
 #include <vector>
+#include "TemplateCombination.h"
 
 struct Component;
+struct TemplateCombination;
+
+
 
 class Combinations
 {
@@ -16,6 +20,6 @@ public:
     std::string classify(const std::vector<Component> & components, std::vector<int> & order) const;
 
 private:
-    // implementation details
+    std::vector<TemplateCombination> templates;
 };
 

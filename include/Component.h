@@ -3,9 +3,9 @@
 #include <ctime>
 #include <istream>
 #include <string>
+#include <cmath>
 
-enum class InstrumentType : char
-{
+enum class InstrumentType : char {
     C = 'C',
     F = 'F',
     O = 'O',
@@ -14,10 +14,12 @@ enum class InstrumentType : char
     Unknown = '\0'
 };
 
-struct Component
-{
+struct Component {
     static Component from_stream(std::istream &);
+
     static Component from_string(const std::string &);
+
+    static bool testOptions(const InstrumentType&);
 
     InstrumentType type{InstrumentType::Unknown};
     double ratio{0};
