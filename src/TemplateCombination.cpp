@@ -1,29 +1,15 @@
-#include <TemplateCombination.h>
-
 #include <utility>
 #include <set>
 #include <algorithm>
-#include <Time.h>
-#include <unordered_set>
+#include <bits/unordered_set.h>
+#include "Time.h"
+#include "TemplateCombination.h"
 
-namespace {
-    void getUniqueVector(std::vector<Component> &input) {
-        std::vector<Component> temp;
-        std::vector<int> check(input.size(), 1);
-        for (int i = 0; i < input.size(); i++) {
-            if (check[i]) {
-                temp.emplace_back(input[i]);
-                check[i] = 0;
-                for (int j = i + 1; j < input.size(); j++) {
-                    if (input[i] == input[j]) {
-                        check[j] = 0;
-                    }
-                }
-            }
-        }
-        input = temp;
-    };
-}
+
+static std::map<std::string, CardinalityType> const string_to_cardinal = {{"fixed",    CardinalityType::FIXED},
+                                                                          {"multiple", CardinalityType::MULTIPLE},
+                                                                          {"more",     CardinalityType::MORE}};
+
 
 bool
 TemplateCombination::match(const TemplateCombination &templateCombination, const std::vector<Component> &combination,
@@ -31,11 +17,6 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
     if (templateCombination.cardinalityType == CardinalityType::FIXED &&
         combination.size() != templateCombination.count) {
         return false;
-    }
-    if (templateCombination.identifier == "d60e378c-575b-11df-80da-6b7a129b2e6e") {
-
-        int c = 55;
-
     }
     if (templateCombination.cardinalityType == CardinalityType::MULTIPLE &&
         combination.size() % templateCombination.count != 0) {
@@ -64,7 +45,8 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
 
     std::vector<Component> fixed = combination;
     if (templateCombination.cardinalityType == CardinalityType::MULTIPLE) {
-        getUniqueVector(fixed);
+        std::unordered_set<Component> temp(fixed.begin(), fixed.end());
+        fixed = std::vector<Component>(temp.begin(), temp.end());
         if (fixed.size() != templateCombination.count) {
             return false;
         }
@@ -79,7 +61,7 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
     for (int i = 0; i < end; i++) {
         bool flag = true;
         for (int j = 0; j < templateCombination.count; j++) {
-            flag = flag && TemplateComponent::match(templateCombination.legs[j], fixed[order[j]]);
+            flag = flag && templateCombination.legs[j].match(fixed[order[j]]);
         }
 
         if (flag) {
@@ -209,7 +191,7 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
         }
 
         if (flag) {
-            std::vector<int> temp = order;
+            std::vector<int> temp = std::move(order);
             order.clear();
             std::vector<int> count(fixed.size(),0);
             for (auto c: combination) {
@@ -242,9 +224,8 @@ int TemplateCombination::parse(pugi::xml_node node, TemplateCombination &templat
         templateCombination.count = std::stoi(node.attribute("mincount").value());
     }
     for (pugi::xml_node leg: node.children("leg")) {
-        TemplateComponent templateComponent;
-        if (TemplateComponent::parse(leg, templateComponent) == -1) return -1;
-        templateCombination.legs.emplace_back(templateComponent);
+        templateCombination.legs.emplace_back(TemplateComponent());
+        if (!templateCombination.legs.back().parse(leg)) return -1;
     }
     if (templateCombination.cardinalityType != CardinalityType::MORE) {
         templateCombination.count = templateCombination.legs.size();
@@ -252,10 +233,10 @@ int TemplateCombination::parse(pugi::xml_node node, TemplateCombination &templat
     return templateCombination.count;
 }
 
-TemplateCombination::TemplateCombination(std::string name, CardinalityType cardinalityType, size_t count,
-                                         std::vector<TemplateComponent> legs) : name(std::move(name)),
-                                                                                cardinalityType(cardinalityType),
-                                                                                count(count), legs(std::move(legs)) {}
+TemplateCombination::TemplateCombination(std::string && name, CardinalityType cardinalityType, size_t count,
+                                         std::vector<TemplateComponent> && legs) : name(std::move(name)),
+                                                                                   cardinalityType(cardinalityType),
+                                                                                   count(count), legs(std::move(legs)) {}
 
 TemplateCombination::TemplateCombination() {
     this->count = -1;
@@ -263,4 +244,12 @@ TemplateCombination::TemplateCombination() {
     this->identifier = "";
     this->shortName = "";
     this->name = "";
+}
+
+bool TemplateCombination::match(const std::vector<Component> &combination, std::vector<int> &order) const {
+    return match(*this, combination, order);
+}
+
+int TemplateCombination::parse(pugi::xml_node node) {
+    return parse(node, *this);
 }

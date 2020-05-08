@@ -6,9 +6,8 @@ bool Combinations::load(const std::filesystem::path &resource) {
     if (!doc.load_file(resource.c_str())) return false;
     pugi::xml_node root = doc.child("combinations");
     for (auto node: root.children("combination")){
-        TemplateCombination combination;
-        if (TemplateCombination::parse(node, combination) == -1) return false;
-        templates.emplace_back(combination);
+        templates.emplace_back(TemplateCombination());
+        if (templates.back().parse(node) == -1) return false;
     }
     return true;
 }
@@ -16,7 +15,7 @@ bool Combinations::load(const std::filesystem::path &resource) {
 std::string Combinations::classify(const std::vector<Component> &components, std::vector<int> &order) const {
     for (const auto& templateCombinations: templates) {
         order.clear();
-        if (TemplateCombination::match(templateCombinations, components, order)) {
+        if (templateCombinations.match(components, order)) {
             std::string result = templateCombinations.name;
             return result;
         }
@@ -24,4 +23,3 @@ std::string Combinations::classify(const std::vector<Component> &components, std
     order.clear();
     return "Unclassified";
 }
-

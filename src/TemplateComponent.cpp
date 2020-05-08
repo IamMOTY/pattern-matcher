@@ -3,11 +3,11 @@
 #include <utility>
 
 
-TemplateComponent::TemplateComponent(InstrumentType instrumentType, std::string strike,
-                                     std::string expiration, std::string ratio) : instrumentType(
+TemplateComponent::TemplateComponent(InstrumentType instrumentType, std::string &&strike,
+                                     std::string &&expiration, std::string &&ratio) : instrumentType(
         instrumentType), strike(std::move(strike)), expiration(std::move(expiration)), ratio(std::move(ratio)) {}
 
-int TemplateComponent::parse(pugi::xml_node node, TemplateComponent &templateComponent) {
+bool TemplateComponent::parse(const pugi::xml_node &node, TemplateComponent &templateComponent) {
     templateComponent.instrumentType = static_cast<InstrumentType>(node.attribute("type").value()[0]);
     templateComponent.ratio = node.attribute("ratio").value();
     if (node.attribute("strike_offset")) {
@@ -24,8 +24,10 @@ int TemplateComponent::parse(pugi::xml_node node, TemplateComponent &templateCom
     } else {
         templateComponent.expiration = "";
     }
-    return 1;
+    return true;
 }
+
+
 
 TemplateComponent::TemplateComponent() {
     this->instrumentType = InstrumentType::Unknown;
@@ -34,7 +36,7 @@ TemplateComponent::TemplateComponent() {
     this->strike = "";
 };
 
-bool TemplateComponent::match(const TemplateComponent &templateComponent, Component component) {
+bool TemplateComponent::match(const TemplateComponent &templateComponent, const Component &component) {
     if (templateComponent.instrumentType == InstrumentType::O) {
         if (component.type != InstrumentType::O &&
             component.type != InstrumentType::C &&
@@ -65,3 +67,12 @@ bool TemplateComponent::match(const TemplateComponent &templateComponent, Compon
 
     return true;
 }
+
+bool TemplateComponent::match(const Component &component) const {
+    return match(*this, component);
+}
+
+bool TemplateComponent::parse(const pugi::xml_node & node) {
+    return parse(node, *this);
+}
+

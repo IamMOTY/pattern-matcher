@@ -22,4 +22,3 @@ public:
 private:
     std::vector<TemplateCombination> templates;
 };
-

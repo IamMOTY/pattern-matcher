@@ -27,7 +27,7 @@ file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 list(REMOVE_ITEM SRC_FILES ${PROJECT_SOURCE_DIR}/src/main.cpp)
 
 # Compile source files into a library
-add_library(combinations_lib ${SRC_FILES} src/TemplateCombination.cpp src/TemplateCompanent.cpp src/Time.cpp include/Time.h)
+add_library(combinations_lib ${SRC_FILES} )
 target_link_libraries(combinations_lib PUBLIC xml_lib std::filesystem)
 
 # Main is separate
