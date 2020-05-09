@@ -8,7 +8,7 @@ bool Ratio::match(const double & value) const {
     if (this->c == -INF) {
         return value < 0;
     }
-    return std::abs(value - c) < 1e7;
+    return std::abs(value - c) < 1e-7;
 }
 
 
