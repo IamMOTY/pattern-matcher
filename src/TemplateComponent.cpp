@@ -9,7 +9,7 @@ TemplateComponent::TemplateComponent(InstrumentType instrumentType, std::string 
 
 bool TemplateComponent::parse(const pugi::xml_node &node, TemplateComponent &templateComponent) {
     templateComponent.instrumentType = static_cast<InstrumentType>(node.attribute("type").value()[0]);
-    templateComponent.ratio = node.attribute("ratio").value();
+    templateComponent.ratio = Ratio(node.attribute("ratio").value());
     if (node.attribute("strike_offset")) {
         templateComponent.strike = node.attribute("strike_offset").value();
     } else if (node.attribute("strike")) {
@@ -31,9 +31,9 @@ bool TemplateComponent::parse(const pugi::xml_node &node, TemplateComponent &tem
 
 TemplateComponent::TemplateComponent() {
     this->instrumentType = InstrumentType::Unknown;
-    this->ratio = "";
     this->expiration = "";
     this->strike = "";
+    this->ratio;
 };
 
 bool TemplateComponent::match(const TemplateComponent &templateComponent, const Component &component) {
@@ -52,20 +52,7 @@ bool TemplateComponent::match(const TemplateComponent &templateComponent, const 
         return false;
     }
 
-    if (templateComponent.ratio == "-" && component.ratio > 0) {
-        return false;
-    }
-
-    if (templateComponent.ratio == "+" && component.ratio < 0) {
-        return false;
-    }
-
-    if ((isdigit(templateComponent.ratio[0]) || templateComponent.ratio.size() > 1) &&
-        std::abs(std::stod(templateComponent.ratio) - component.ratio) > 1e-7) {
-        return false;
-    }
-
-    return true;
+   return templateComponent.ratio.match(component.ratio);
 }
 
 bool TemplateComponent::match(const Component &component) const {

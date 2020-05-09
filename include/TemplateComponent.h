@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Component.h"
+#include "Ratio.h"
 #include "pugixml.hpp"
 #include <vector>
 #include <variant>
@@ -20,5 +21,5 @@ struct TemplateComponent {
     InstrumentType instrumentType;
     std::string strike;
     std::string expiration;
-    std::string ratio;
+    Ratio ratio;
 };
