@@ -56,6 +56,12 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
         order.emplace_back(k);
     }
 
+    if (templateCombination.name == "Inter commodity spread") {
+
+        1 + 2;
+
+    }
+
     int end = 1;
     for (int i = 2; i <= templateCombination.count; end *= i++);
     for (int i = 0; i < end; i++) {
@@ -66,15 +72,14 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
 
         if (flag) {
             std::tm def{};
-            std::map<std::string, std::tm> check;
+            std::unordered_map<Expiration, std::tm> check;
             for (int k = 0; k < templateCombination.count && flag; k++) {
-                std::string templateString = templateCombination.legs[k].expiration;
-                if (templateString.size() == 1 && isupper(templateString[0]) ||
-                    !templateString.empty() && templateString[0] == '+') {
-                    if (Time::comp(check[templateString], def) == 0) {
-                        check[templateString] = fixed[order[k]].expiration;
+                Expiration temp_exp = templateCombination.legs[k].expiration;
+                if (temp_exp.ischeckable()) {
+                    if (Time::comp(check[temp_exp], def) == 0) {
+                        check[temp_exp] = fixed[order[k]].expiration;
                     } else {
-                        if (Time::comp(check[templateString], fixed[order[k]].expiration) != 0) {
+                        if (Time::comp(check[temp_exp], fixed[order[k]].expiration) != 0) {
                             flag = false;
                             continue;
                         }
@@ -86,37 +91,25 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
         if (flag) {
             std::tm saved{};
             for (int k = 0; k < templateCombination.count && flag; k++) {
-                std::string templateString = templateCombination.legs[k].expiration;
-                if (templateString.size() == 1 && isupper(templateString[0]) || templateString.empty()) {
+                Expiration temp_exp = templateCombination.legs[k].expiration;
+                if (temp_exp.isbear()) {
                     saved = fixed[order[k]].expiration;
                 } else {
-                    if (templateString[0] == '+') {
-                        std::string prevTemplateString = templateCombination.legs[k - 1].expiration;
-                        if ((prevTemplateString.size() == 1 && isupper(prevTemplateString[0]) ||
-                             prevTemplateString.empty() || prevTemplateString < templateString) &&
+                    if (temp_exp.sym == '+') {
+                        Expiration prev_exp = templateCombination.legs[k - 1].expiration;
+                        if (prev_exp < temp_exp &&
                             Time::comp(fixed[order[k - 1]].expiration, fixed[order[k]].expiration) <= 0) {
                             flag = false;
                             continue;
                         }
                     }
-                    if (templateString.back() == 'q' || templateString.back() == 'm' ||
-                        templateString.back() == 'y' || templateString.back() == 'd') {
-                        if (Time::comp(saved, fixed[order[k]].expiration) == -1) {
+                    if (temp_exp.isdelta()) {
+                    	if (Time::comp(saved, fixed[order[k]].expiration) == -1) {
                             flag = false;
                             continue;
                         }
-                        std::string temp;
-                        for (char c:templateString) {
-                            if (isdigit(c)) {
-                                temp += c;
-                            }
-                        }
-                        if (temp.empty()) {
-                            temp = "1";
-                        }
-                        int count = std::stoi(temp);
                         int test;
-                        switch (templateString.back()) {
+                        switch (temp_exp.sym) {
                             case 'q':
                                 test = Time::diffInQuart(saved, fixed[order[k]].expiration);
                                 break;
@@ -129,7 +122,7 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
                             case 'y':
                                 test = Time::diffInYears(saved, fixed[order[k]].expiration);
                         }
-                        if (count != test) {
+                        if (temp_exp.count != test) {
                             flag = false;
                             continue;
                         }

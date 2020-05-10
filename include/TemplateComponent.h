@@ -3,6 +3,7 @@
 #include "Component.h"
 #include "Ratio.h"
 #include "pugixml.hpp"
+#include "Expiration.h"
 #include <vector>
 #include <variant>
 
@@ -20,6 +21,6 @@ struct TemplateComponent {
 
     InstrumentType instrumentType;
     std::string strike;
-    std::string expiration;
+    Expiration expiration;
     Ratio ratio;
 };

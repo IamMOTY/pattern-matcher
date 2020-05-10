@@ -18,11 +18,11 @@ bool TemplateComponent::parse(const pugi::xml_node &node, TemplateComponent &tem
         templateComponent.strike = "";
     }
     if (node.attribute("expiration_offset")) {
-        templateComponent.expiration = node.attribute("expiration_offset").value();
+        templateComponent.expiration = Expiration(node.attribute("expiration_offset").value());
     } else if (node.attribute("expiration")) {
-        templateComponent.expiration = node.attribute("expiration").value();
+        templateComponent.expiration = Expiration(node.attribute("expiration").value());
     } else {
-        templateComponent.expiration = "";
+        templateComponent.expiration = Expiration("");
     }
     return true;
 }
@@ -31,7 +31,7 @@ bool TemplateComponent::parse(const pugi::xml_node &node, TemplateComponent &tem
 
 TemplateComponent::TemplateComponent() {
     this->instrumentType = InstrumentType::Unknown;
-    this->expiration = "";
+    this->expiration = Expiration("");
     this->strike = "";
     this->ratio;
 };
