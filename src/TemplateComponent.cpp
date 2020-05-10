@@ -11,11 +11,11 @@ bool TemplateComponent::parse(const pugi::xml_node &node, TemplateComponent &tem
     templateComponent.instrumentType = static_cast<InstrumentType>(node.attribute("type").value()[0]);
     templateComponent.ratio = Ratio(node.attribute("ratio").value());
     if (node.attribute("strike_offset")) {
-        templateComponent.strike = node.attribute("strike_offset").value();
+        templateComponent.strike = Strike(node.attribute("strike_offset").value());
     } else if (node.attribute("strike")) {
-        templateComponent.strike = node.attribute("strike").value();
+        templateComponent.strike = Strike(node.attribute("strike").value());
     } else {
-        templateComponent.strike = "";
+        templateComponent.strike = Strike("");
     }
     if (node.attribute("expiration_offset")) {
         templateComponent.expiration = Expiration(node.attribute("expiration_offset").value());
@@ -32,7 +32,7 @@ bool TemplateComponent::parse(const pugi::xml_node &node, TemplateComponent &tem
 TemplateComponent::TemplateComponent() {
     this->instrumentType = InstrumentType::Unknown;
     this->expiration = Expiration("");
-    this->strike = "";
+    this->strike = Strike("");
     this->ratio;
 };
 

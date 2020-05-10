@@ -133,16 +133,15 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
 
 
         if (flag) {
-            std::map<std::string, double> check;
+            std::unordered_map<Strike, double> check;
             for (int k = 0; k < templateCombination.count && flag; k++) {
                 if (Component::testOptions(fixed[order[k]].type)) {
-                    std::string templateString = templateCombination.legs[k].strike;
-                    if (templateString.size() == 1 && isupper(templateString[0]) ||
-                        !templateString.empty() && templateString[0] == '+' || templateString[0] == '-') {
-                        if (check[templateString] == 0) {
-                            check[templateString] = fixed[order[k]].strike;
+                    Strike temp_strike = templateCombination.legs[k].strike;
+                    if (temp_strike.ischeckable()) {
+                        if (check[temp_strike] == 0) {
+                            check[temp_strike] = fixed[order[k]].strike;
                         } else {
-                            if (std::abs(check[templateString] - fixed[order[k]].strike) > 1e-7) {
+                            if (std::abs(check[temp_strike] - fixed[order[k]].strike) > 1e-7) {
                                 flag = false;
                                 continue;
                             }
@@ -156,23 +155,21 @@ TemplateCombination::match(const TemplateCombination &templateCombination, const
             double saved;
             for (int k = 0; k < templateCombination.count && flag; k++) {
                 if (Component::testOptions(fixed[order[k]].type)) {
-                    std::string templateString = templateCombination.legs[k].strike;
-                    if (templateString.size() == 1 && isupper(templateString[0]) || templateString.empty()) {
+                    Strike temp_strike = templateCombination.legs[k].strike;
+                    if (temp_strike.isbear()) {
                         saved = fixed[order[k]].strike;
                     } else {
-                        if (templateString[0] == '+') {
-                            std::string prevTemplateString = templateCombination.legs[k - 1].strike;
-                            if ((prevTemplateString.size() == 1 && isupper(prevTemplateString[0]) ||
-                                 prevTemplateString.empty() || prevTemplateString < templateString) &&
+                        if (temp_strike.sym == '+') {
+                            Strike prev_strike = templateCombination.legs[k - 1].strike;
+                            if (prev_strike < temp_strike &&
                                 fixed[order[k]].strike <= fixed[order[k - 1]].strike) {
                                 flag = false;
                                 continue;
                             }
                         }
-                        if (templateString[0] == '-') {
-                            std::string prevTemplateString = templateCombination.legs[k - 1].strike;
-                            if ((prevTemplateString.size() == 1 && isupper(prevTemplateString[0]) ||
-                                 prevTemplateString.empty() || prevTemplateString < templateString) &&
+                        if (temp_strike.sym == '-') {
+                            Strike prev_strike = templateCombination.legs[k - 1].strike;
+                            if (prev_strike < temp_strike &&
                                 fixed[order[k]].strike >= fixed[order[k - 1]].strike) {
                                 flag = false;
                                 continue;

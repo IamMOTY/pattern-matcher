@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Strike.h"
 #include "Component.h"
 #include "Ratio.h"
 #include "pugixml.hpp"
@@ -20,7 +21,7 @@ struct TemplateComponent {
     bool parse(const pugi::xml_node&);
 
     InstrumentType instrumentType;
-    std::string strike;
+    Strike strike;
     Expiration expiration;
     Ratio ratio;
 };
