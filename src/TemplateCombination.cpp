@@ -130,11 +130,11 @@ namespace {
         return flag;
     }
 
+    std::map<std::string, CardinalityType> const string_to_cardinal = {{"fixed",    CardinalityType::FIXED},
+                                                                       {"multiple", CardinalityType::MULTIPLE},
+                                                                       {"more",     CardinalityType::MORE}};
 } // namespace
 
-static std::map<std::string, CardinalityType> const string_to_cardinal = {{"fixed",    CardinalityType::FIXED},
-                                                                          {"multiple", CardinalityType::MULTIPLE},
-                                                                          {"more",     CardinalityType::MORE}};
 
 
 bool

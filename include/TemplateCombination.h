@@ -36,7 +36,4 @@ struct TemplateCombination {
     CardinalityType cardinalityType;
     int count{0};
     std::vector<TemplateComponent> legs;
-
-private:
-
 };

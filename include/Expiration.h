@@ -32,7 +32,7 @@ public:
 
     }
 
-    Expiration();
+    Expiration() = default;
 
     bool operator<(Expiration val) const {
         if (isupper(this->sym) || this->sym == 0) {
@@ -56,10 +56,8 @@ public:
     [[nodiscard]] bool isdelta() const;
 
 
-    int count{};
-    char sym{};
-
-private:
+    int count = 0;
+    char sym = 0;
 
 };
 

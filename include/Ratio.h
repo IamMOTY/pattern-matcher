@@ -14,12 +14,12 @@ public:
         }
     }
 
-    Ratio(){};
+    Ratio() = default;
 
     [[nodiscard]] bool match(const double &) const ;
 
 private:
-    double c{0};
+    double c = 0;
     double INF = 1 << 16;
 };
 
