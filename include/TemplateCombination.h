@@ -18,14 +18,10 @@ struct TemplateCombination {
 
     TemplateCombination();
 
-    static bool match(const TemplateCombination &templateCombination, const std::vector<Component> &combination,
-                      std::vector<int> &order);
-
     bool match(const std::vector<Component> &combination,
                std::vector<int> &order) const;
 
 
-    static int parse(pugi::xml_node node, TemplateCombination &templateCombination);
 
     int parse(pugi::xml_node node);
 
@@ -34,6 +30,6 @@ struct TemplateCombination {
     std::string shortName;
     std::string identifier;
     CardinalityType cardinalityType;
-    int count{0};
+    int count = 0;
     std::vector<TemplateComponent> legs;
 };

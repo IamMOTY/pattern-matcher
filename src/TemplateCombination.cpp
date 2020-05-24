@@ -135,119 +135,6 @@ namespace {
                                                                        {"more",     CardinalityType::MORE}};
 } // namespace
 
-
-
-bool
-TemplateCombination::match(const TemplateCombination &templateCombination, const std::vector<Component> &combination,
-                           std::vector<int> &order) {
-    if (templateCombination.cardinalityType == CardinalityType::FIXED &&
-        combination.size() != templateCombination.count) {
-        return false;
-    }
-    if (templateCombination.cardinalityType == CardinalityType::MULTIPLE &&
-        combination.size() % templateCombination.count != 0) {
-        return false;
-    }
-    if (templateCombination.cardinalityType == CardinalityType::MORE &&
-        combination.size() < templateCombination.count) {
-        return false;
-    }
-
-    if (templateCombination.cardinalityType == CardinalityType::MORE) {
-        bool flag = true;
-        order.clear();
-        for (int j = 0; j < combination.size(); j++) {
-            flag = flag && TemplateComponent::match(templateCombination.legs[0], combination[j]);
-            order.emplace_back(j + 1);
-        }
-        if (!flag) {
-            order.clear();
-        }
-        return flag;
-    }
-
-
-    std::vector<Component> fixed = combination;
-    if (templateCombination.cardinalityType == CardinalityType::MULTIPLE) {
-        std::unordered_set<Component> temp(fixed.begin(), fixed.end());
-        fixed = std::vector<Component>(temp.begin(), temp.end());
-        if (fixed.size() != templateCombination.count) {
-            return false;
-        }
-    }
-    order.clear();
-    for (int k = 0; k < templateCombination.count; k++) {
-        order.emplace_back(k);
-    }
-
-    int end = 1;
-    for (int i = 2; i <= templateCombination.count; end *= i++);
-    for (int i = 0; i < end; i++) {
-        bool flag = true;
-        for (int j = 0; j < templateCombination.count; j++) {
-            flag = flag && templateCombination.legs[j].match(fixed[order[j]]);
-        }
-
-        if (flag) {
-            flag = check_same_values_expr(templateCombination, fixed, order);
-        }
-
-        if (flag) {
-            flag = check_sequence_expr(templateCombination, fixed, order);
-        }
-
-
-        if (flag) {
-            flag = check_same_values_strike(templateCombination, fixed, order);
-        }
-
-        if (flag) {
-            flag = check_sequence_strike(templateCombination, fixed, order);
-        }
-
-        if (flag) {
-            std::vector<int> temp = std::move(order);
-            order.clear();
-            std::vector<int> count(fixed.size(), 0);
-            for (auto c: combination) {
-                for (int k = 0; k < templateCombination.count; k++) {
-                    if (c == fixed[temp[k]]) {
-                        order.emplace_back(k + 1 + fixed.size() * count[k]++);
-                        break;
-                    }
-                }
-            }
-            return true;
-        }
-
-        std::next_permutation(order.begin(), order.end());
-    }
-    return false;
-}
-
-int TemplateCombination::parse(pugi::xml_node node, TemplateCombination &templateCombination) {
-    templateCombination.name = node.attribute("name").value();
-    templateCombination.shortName = node.attribute("shortname").value();
-    templateCombination.identifier = node.attribute("identifier").value();
-    node = node.child("legs");
-    if (auto it = string_to_cardinal.find(node.attribute("cardinality").value()); it != string_to_cardinal.end()) {
-        templateCombination.cardinalityType = it->second;
-    } else {
-        return -1;
-    }
-    if (templateCombination.cardinalityType == CardinalityType::MORE) {
-        templateCombination.count = std::stoi(node.attribute("mincount").value());
-    }
-    for (pugi::xml_node leg: node.children("leg")) {
-        templateCombination.legs.emplace_back(TemplateComponent());
-        if (!templateCombination.legs.back().parse(leg)) return -1;
-    }
-    if (templateCombination.cardinalityType != CardinalityType::MORE) {
-        templateCombination.count = templateCombination.legs.size();
-    }
-    return templateCombination.count;
-}
-
 TemplateCombination::TemplateCombination(std::string &&name, CardinalityType cardinalityType, size_t count,
                                          std::vector<TemplateComponent> &&legs) : name(std::move(name)),
                                                                                   cardinalityType(cardinalityType),
@@ -262,9 +149,110 @@ TemplateCombination::TemplateCombination() {
 }
 
 bool TemplateCombination::match(const std::vector<Component> &combination, std::vector<int> &order) const {
-    return match(*this, combination, order);
+    if (this->cardinalityType == CardinalityType::FIXED &&
+        combination.size() != this->count) {
+        return false;
+    }
+    if (this->cardinalityType == CardinalityType::MULTIPLE &&
+        combination.size() % this->count != 0) {
+        return false;
+    }
+    if (this->cardinalityType == CardinalityType::MORE &&
+        combination.size() < this->count) {
+        return false;
+    }
+
+    if (this->cardinalityType == CardinalityType::MORE) {
+        bool flag = true;
+        order.clear();
+        for (int j = 0; j < combination.size(); j++) {
+            flag = flag && this->legs[0].match(combination[j]);
+            order.emplace_back(j + 1);
+        }
+        if (!flag) {
+            order.clear();
+        }
+        return flag;
+    }
+
+
+    std::vector<Component> fixed = combination;
+    if (this->cardinalityType == CardinalityType::MULTIPLE) {
+        std::unordered_set<Component> temp(fixed.begin(), fixed.end());
+        fixed = std::vector<Component>(temp.begin(), temp.end());
+        if (fixed.size() != this->count) {
+            return false;
+        }
+    }
+    order.clear();
+    for (int k = 0; k < this->count; k++) {
+        order.emplace_back(k);
+    }
+
+    int end = 1;
+    for (int i = 2; i <= this->count; end *= i++);
+    for (int i = 0; i < end; i++) {
+        bool flag = true;
+        for (int j = 0; j < this->count; j++) {
+            flag = flag && this->legs[j].match(fixed[order[j]]);
+        }
+
+        if (flag) {
+            flag = check_same_values_expr(*this, fixed, order);
+        }
+
+        if (flag) {
+            flag = check_sequence_expr(*this, fixed, order);
+        }
+
+
+        if (flag) {
+            flag = check_same_values_strike(*this, fixed, order);
+        }
+
+        if (flag) {
+            flag = check_sequence_strike(*this, fixed, order);
+        }
+
+        if (flag) {
+            std::vector<int> temp = std::move(order);
+            order.clear();
+            std::vector<int> number(fixed.size(), 0);
+            for (auto c: combination) {
+                for (int k = 0; k < this->count; k++) {
+                    if (c == fixed[temp[k]]) {
+                        order.emplace_back(k + 1 + fixed.size() * number[k]++);
+                        break;
+                    }
+                }
+            }
+            return true;
+        }
+
+        std::next_permutation(order.begin(), order.end());
+    }
+    return false;
 }
 
 int TemplateCombination::parse(pugi::xml_node node) {
-    return parse(node, *this);
+    this->name = node.attribute("name").value();
+    this->shortName = node.attribute("shortname").value();
+    this->identifier = node.attribute("identifier").value();
+    node = node.child("legs");
+    if (auto it = string_to_cardinal.find(node.attribute("cardinality").value()); it != string_to_cardinal.end()) {
+        this->cardinalityType = it->second;
+    } else {
+        return -1;
+    }
+    if (this->cardinalityType == CardinalityType::MORE) {
+        this->count = std::stoi(node.attribute("mincount").value());
+    }
+    for (pugi::xml_node leg: node.children("leg")) {
+        this->legs.emplace_back(TemplateComponent());
+        if (!this->legs.back().parse(leg)) return -1;
+    }
+    if (this->cardinalityType != CardinalityType::MORE) {
+        this->count = this->legs.size();
+    }
+    return this->count;
 }
