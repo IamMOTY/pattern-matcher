@@ -20,7 +20,7 @@ struct Component {
 
     static Component from_string(const std::string &);
 
-    static bool testOptions(const InstrumentType &);
+    static bool testOptions(InstrumentType);
 
     bool operator==(Component val) const {
         return this->type == val.type && std::abs(this->ratio - val.ratio) < 1e-7 && this->strike == val.strike &&

@@ -54,7 +54,7 @@ Component Component::from_string(const std::string & str)
     return from_stream(strm);
 }
 
-bool Component::testOptions(const InstrumentType &value) {
+bool Component::testOptions(InstrumentType value) {
     return value == InstrumentType::O || value == InstrumentType::P || value == InstrumentType::C;
 }
 

@@ -16,7 +16,7 @@ public:
 
     Ratio() = default;
 
-    [[nodiscard]] bool match(const double &) const ;
+    [[nodiscard]] bool match(double) const ;
 
 private:
     double c = 0;
