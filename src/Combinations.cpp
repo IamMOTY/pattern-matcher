@@ -13,8 +13,8 @@ bool Combinations::load(const std::filesystem::path &resource) {
 }
 
 std::string Combinations::classify(const std::vector<Component> &components, std::vector<int> &order) const {
+    order.clear();
     for (const auto& templateCombinations: templates) {
-        order.clear();
         if (templateCombinations.match(components, order)) {
             std::string result = templateCombinations.name;
             return result;
