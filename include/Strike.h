@@ -18,7 +18,7 @@ public:
         }
     }
 
-    Strike() = default;
+    Strike();
 
     bool operator<(Strike val) const {
         if (isupper(this->sym) || this->sym == 0) {

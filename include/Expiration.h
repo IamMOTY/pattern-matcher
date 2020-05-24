@@ -32,7 +32,7 @@ public:
 
     }
 
-    Expiration() = default;
+    Expiration();
 
     bool operator<(Expiration val) const {
         if (isupper(this->sym) || this->sym == 0) {
