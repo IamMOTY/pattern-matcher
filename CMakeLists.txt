@@ -31,7 +31,8 @@ add_library(combinations_lib ${SRC_FILES})
 target_link_libraries(combinations_lib PUBLIC xml_lib std::filesystem)
 
 # Main is separate
-add_executable(combinations ${PROJECT_SOURCE_DIR}/src/main.cpp)
+add_executable(combinations ${PROJECT_SOURCE_DIR}/src/main.cpp include/TemplateCombination.h include/TemplateComponent.h include/Ratio.h include/Expiration.h include/Strike.h)
+
 
 # linking Main against the library
 target_link_libraries(combinations combinations_lib)
