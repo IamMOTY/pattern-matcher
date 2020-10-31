@@ -35,11 +35,11 @@ public:
     };
 
 
-    [[nodiscard]] bool isbear() const;
+    [[nodiscard]] bool isBear() const;
 
-    [[nodiscard]] bool ischeckable() const;
+    [[nodiscard]] bool isCheckable() const;
 
-    [[nodiscard]] bool isdelta() const;
+    [[nodiscard]] bool isDelta() const;
 
 
     int count = 0;

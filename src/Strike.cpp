@@ -1,10 +1,10 @@
 #include "Strike.h"
 
-bool Strike::isbear() const {
+bool Strike::isBear() const {
     return this->sym == 0 || isupper(this->sym);
 }
 
-bool Strike::ischeckable() const {
+bool Strike::isCheckable() const {
     return isupper(this->sym) || this->sym == '+' || this->sym == '-';
 }
 

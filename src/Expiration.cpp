@@ -1,14 +1,14 @@
 #include "Expiration.h"
 
-bool Expiration::isbear() const {
+bool Expiration::isBear() const {
     return this->sym == 0 || isupper(this->sym);
 }
 
-bool Expiration::ischeckable() const {
+bool Expiration::isCheckable() const {
     return isupper(this->sym) || this->sym == '+';
 }
 
-bool Expiration::isdelta() const {
+bool Expiration::isDelta() const {
     return islower(this->sym);
 }
 

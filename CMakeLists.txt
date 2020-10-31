@@ -13,7 +13,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(Filesystem REQUIRED)
 
 # XML parsing subproject
-add_subdirectory(xml/pugixml)
+add_subdirectory(pugixml)
  add_library(xml_lib ALIAS pugixml)
 
 # Inlcude directories
@@ -31,7 +31,7 @@ add_library(combinations_lib ${SRC_FILES})
 target_link_libraries(combinations_lib PUBLIC xml_lib std::filesystem)
 
 # Main is separate
-add_executable(combinations ${PROJECT_SOURCE_DIR}/src/main.cpp include/TemplateCombination.h include/TemplateComponent.h include/Ratio.h include/Expiration.h include/Strike.h)
+add_executable(combinations ${PROJECT_SOURCE_DIR}/src/main.cpp)
 
 
 # linking Main against the library

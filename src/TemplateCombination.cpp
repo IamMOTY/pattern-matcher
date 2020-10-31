@@ -1,7 +1,10 @@
 #include <utility>
 #include <set>
 #include <algorithm>
-#include <bits/unordered_set.h>
+#include <unordered_set>
+#include <ctime>
+#include <cwchar>
+#include <unordered_map>
 #include "Time.h"
 #include "TemplateCombination.h"
 
@@ -14,7 +17,7 @@ namespace {
         std::unordered_map<Expiration, std::tm> check;
         for (int k = 0; k < templateCombination.count && flag; k++) {
             Expiration temp_exp = templateCombination.legs[k].expiration;
-            if (temp_exp.ischeckable()) {
+            if (temp_exp.isCheckable()) {
                 if (Time::comp(check[temp_exp], def) == 0) {
                     check[temp_exp] = fixed[order[k]].expiration;
                 } else {
@@ -35,7 +38,7 @@ namespace {
         std::tm saved{};
         for (int k = 0; k < templateCombination.count && flag; k++) {
             Expiration temp_exp = templateCombination.legs[k].expiration;
-            if (temp_exp.isbear()) {
+            if (temp_exp.isBear()) {
                 saved = fixed[order[k]].expiration;
             } else {
                 if (temp_exp.sym == '+') {
@@ -46,7 +49,7 @@ namespace {
                         continue;
                     }
                 }
-                if (temp_exp.isdelta()) {
+                if (temp_exp.isDelta()) {
                     if (Time::comp(saved, fixed[order[k]].expiration) == -1) {
                         flag = false;
                         continue;
@@ -82,7 +85,7 @@ namespace {
         for (int k = 0; k < templateCombination.count && flag; k++) {
             if (Component::testOptions(fixed[order[k]].type)) {
                 Strike temp_strike = templateCombination.legs[k].strike;
-                if (temp_strike.ischeckable()) {
+                if (temp_strike.isCheckable()) {
                     if (check[temp_strike] == 0) {
                         check[temp_strike] = fixed[order[k]].strike;
                     } else {
@@ -105,7 +108,7 @@ namespace {
         for (int k = 0; k < templateCombination.count && flag; k++) {
             if (Component::testOptions(fixed[order[k]].type)) {
                 Strike temp_strike = templateCombination.legs[k].strike;
-                if (temp_strike.isbear()) {
+                if (temp_strike.isBear()) {
                     saved = fixed[order[k]].strike;
                 } else {
                     if (temp_strike.sym == '+') {
