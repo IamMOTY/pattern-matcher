@@ -1,26 +1,23 @@
-# Класcификация комбинаций
+# Classification of combinations
 
-## Теоретическое введение
+## Theoretical introduction
 
- На современных электронных финансовых рынках торгуется множество видов финансовых инструментов - акции (share), облигации (bond), фьючерсные (future contract) и форфардные (forward contract) контракты, различные типы опционов и т.д. Отдельным видом финансовых инструментов являются комбинации.
-
- _Комбинацией_ называется композитный финансовый инструмент, состоящий из множества инструментов и сопоставленных им весов:
-
+ On modern electronic financial markets, many types of financial instruments are traded - stocks (share), bonds (bond), futures (future contracts) and forward contracts (forward contracts), various types of options, etc. Combinations are a separate type of financial instruments.
+ _Combination_ is a composite financial instrument consisting of many instruments and their associated weights:
+ 
 ![C=(I_1, w_1), (I_2, w_2), \.\.\., (I_N, w_N)](https://render.githubusercontent.com/render/math?math=C%3D(I_1%2C%20w_1)%2C%20(I_2%2C%20w_2)%2C%20%5C.%5C.%5C.%2C%20(I_N%2C%20w_N))
 
-где ![I_1, I_2, \.\.\. , I_N](https://render.githubusercontent.com/render/math?math=I_1%2C%20I_2%2C%20%5C.%5C.%5C.%20%2C%20I_N) - произвольные финансовые инструменты (_компоненты_), а ![w_1, w_2, \.\.\. , w_N](https://render.githubusercontent.com/render/math?math=w_1%2C%20w_2%2C%20%5C.%5C.%5C.%20%2C%20w_N) - соотвествующие им веса (![w_1, w_2, \.\.\. , w_N \in R](https://render.githubusercontent.com/render/math?math=w_1%2C%20w_2%2C%20%5C.%5C.%5C.%20%2C%20w_N%20%5Cin%20R)). Покупка (продажа) комбинации влечет за собой приобретение (продажу) компонент с положительным весом и продажу (покупку) компонент с отрицательным весом. Простым примером комбинации может быть фондовый индекс.
+where ![I_1, I_2, \.\.\. , I_N](https://render.githubusercontent.com/render/math?math=I_1%2C%20I_2%2C%20%5C.%5C.%5C.%20%2C%20I_N) - arbitrary financial instruments (_components_), and ![w_1, w_2, \. \. \. , w_N](https://render.githubusercontent.com/render/math?math=w_1%2C%20w_2%2C%20%5C.%5C.%5C.%20%2C%20w_N) - the corresponding weights ( ![w_1, w_2, \. \. \., w_N \ in R](https://render.githubusercontent.com/render/math?math=w_1%2C%20w_2%2C%20%5C.%5C.%5C.%20%2C%20w_N%20%5Cin%20R)). Buying (selling) a combination entails buying (selling) a positive weight component and selling (buying) a negative weight component. A simple example of a combination would be a stock index.
+                                                                                                                                    
+                                                                                                                                     Further, it will be useful to know what an option is. _Option_ is a financial instrument that gives its owner the right to buy (call option, call option) or sell (put option, put option) an underlying asset (for example, a share) at a certain price (strike price) at a certain moment in the future (date execution, expiration date).
+                                                                                                                                    
+                                                                                                                                     Combinations, like other financial instruments, can be of various types. For example, a combination of one call and one put options with the same prices and expiration dates is called a straddle. And if the strike price of the put option is less than the strike price of the call option (the expiration dates are the same), then the combination is called strangle.
+## Formulation of the problem
 
- Далее полезно будет знать что такое опцион. _Опционом_ называется финансовый инструмент, дающий право его владельцу купить (колл опцион, call option) или продать (пут опцион, put option) базовый актив (например, акцию) по определенной цене (цена исполнения, strike price) в определенный момент в будущем (дата исполнения, expiration date).
+ The task is to determine the type of combination by its structure and properties of the components.
+## Resource format description
 
- Комбинации, как и другие финансовые инструменты, могут быть различных типов. Например комбинация состоящая из одного колл и одного пут опционов с одинаковыми ценами и датами исполнения называется _стреддл_ (straddle). А если цена исполнения пут опциона меньше цены исполнения колл опциона (даты истечения одинаковы), то комбинация называется _стренгл_ (strangle).
-
-## Постановка проблемы
-
- Задача состоит в определении типа комбинации по ее структуре и свойствам компонент.
-
-## Описание формата ресурса
-
-Множество всех типов описано в виде XML-ресурса. Каждая комбинация описыватеся тегом &lt;combination&gt;:
+Many of all types are described as an XML resource. Each combination is described by a tag &lt;combination&gt;:
 
 ```xml
 <combination name="Straddle" shortname="Str" identifier="da5a2620-575b-11df-9029-c3f2a99ff460">
@@ -28,8 +25,8 @@
 </combination>
 ```
 
-Обязательными атрибутами тега &lt;combination&gt; являются полное имя типа комбинации (name), короткое имя (shortname) и UUID индетификатор (identifier).
-Внутри тега &lt;combination&gt; описываются компоненты комбинации:
+Required tag attributes &lt;combination&gt; are the fully qualified name of the combination type (name), short name (shortname) и UUID identifier (identifier).
+Inside the tag &lt;combination&gt; describes the components of the combination:
 
 ```xml
 <combination name="Straddle" shortname="Str" identifier="da5a2620-575b-11df-9029-c3f2a99ff460">
@@ -39,12 +36,12 @@
 </combination>
 ```
 
-У тега &lt;legs&gt; есть обязательный атрибут - количество компонент у комбинаций такого типа (cardinality). Существуют несколько возможных значений атрибута:
-1. **fixed**: количество компонент фиксировано и равно количество описанному в ресурсе.
-3. **multiple**: количество компонент кратно количеству описанному в ресурсе.
-4. **more**: количество компонент должно быть больше либо равно, чем указано в атрибуте **mincount**
+In this &lt;legs&gt; there is a required attribute - the number of components in combinations of this type (cardinality). There are several possible values for the attribute:
+1. **fixed**: the number of components is fixed and is equal to the number described in the resource.
+3. **multiple**: the number of components is a multiple of the number described in the resource.
+4. **more**: the number of components must be greater than or equal to that specified in the attribute **mincount**
 
-Внутри тега &lt;legs&gt; описаны компоненты комбинаций сооветствующего типа:
+Inside the tag &lt;legs&gt; the components of the combinations of the corresponding type are described:
 
 ```xml
 <combination name="Straddle" shortname="Str" identifier="da5a2620-575b-11df-9029-c3f2a99ff460">
@@ -55,15 +52,15 @@
 </combination>
 ```
 
-Каждый тег &lt;leg&gt; имеет обязательные атрибуты:
-1. **type**: тип инструмента соответствующей компоненты описывается буквой из множества (**F** - фьючерс, **O** - опцион, **C** - колл опцион, **P** - пут опцион, **U** - инструмент отличный от опциона). Пут (**P**) и колл (**C**) опционы являются частными случаями опционов (**O**).
+Each tag &lt;leg&gt; has required attributes:
+1. **type**: the type of instrument of the corresponding component is described by a letter from the set (**F** - futures, **O** - option, **C** - call option, **P** - put option, **U** - instrument other than option). put (**P**) и call (**C**) options are special cases of options (**O**).
 
-2. **ratio:** вес соответсвующей компоненты описывается произвольным вещественным числом. Допускается указывать как точный вес, так и просто его знак - &quot;+&quot; или &quot;-&quot;, означающие, что вес положителен или отрицателен.
+2. **ratio:** the weight of the corresponding component is described by an arbitrary real number. It is allowed to indicate both the exact weight and just its sign - &quot;+&quot; или &quot;-&quot;, meaning that the weight is positive or negative.
 
-Каждый лег может иметь дополнительные атрибуты описывающие свойства компоненты:
-1. **strike**: цена исполнения обозначается заглавной буквой латинского алфавита. Те компоненты у которых задан этот атрибут и буквенные обозначения равны должны иметь одинаковую цену исполнения. Атрибут может быть задан только для опционов.
+Each leg can have additional attributes describing the properties of the component:
+1. **strike**: the strike price is indicated by a capital letter of the Latin alphabet. Those components for which this attribute is set and the letter designations are equal must have the same strike price. The attribute can only be specified for options.
 
-2. **strike\_offset**: описывает насколько цена исполнения компоненты дожна быть больше/меньше, чем у предыдущего опциона, для которого этот атрибут не описан. Представляет собой строку из символов &quot;+&quot; или строку из символов &quot;-&quot;. Для наглядного пояснения, приведем пример:
+2. **strike\_offset**: describes how much the component strike price should be higher / lower than that of the previous option, for which this attribute is not described. It is a string of characters &quot;+&quot; or a string of characters &quot;-&quot;. For a visual explanation, here's an example:
 ```xml
 	<!-- ... -->
                 <leg type="P" ratio="1" />
@@ -74,37 +71,31 @@
                 <leg type="С" ratio="1" strike_offset="-"/>
 	<!-- ... -->
 ```
-В данном примере цена исполнения первой компоненты может быть произвольной, цены исполнения второй и третьей компоненты должны быть одинаковы (одинаковые длины означают одинаковое смещение), но больше чем первой. Цена исполнения четвертой компоненты должна быть больше чем цены исполнения второй и третьей. Цена исполнения пятой компоненты может быть произвольной. Цена исполнения шестой компоненты должна быть меньше чем цена исполнения пятой. Атрибут может быть задан только для опционов.
+In this example, the strike price of the first component can be arbitrary, the strike prices of the second and third components must be the same (equal lengths mean the same offset), but higher than the first. The strike price of the fourth component must be greater than the strike prices of the second and third. The execution price of the fifth component can be arbitrary. The strike price of the sixth component must be less than the strike price of the fifth. The attribute can only be specified for options.
 
-3. **expiration**: аналогичен атрибуту strike, описывающий в том же формате дату истечения инструмента.
+3. **expiration**: is similar to the strike attribute, describing the expiration date of the instrument in the same format.
 
-4. **expiration\_offset**: практически аналогичен атрибуту strike\_ffset. Помимо строчек из символов &quot;+&quot; и &quot;-&quot; может содержать контретное смещение в виде &quot;[N]{d,m,q,y}&quot;, где N - натуральное число (может быть пропущено, по умолчанию равно единице), &quot;d&quot; - день, &quot;m&quot; - месяц, &quot;q&quot; - квартал, &quot;y&quot; - год. Отметим, что expiraion\_offset=&quot;q&quot; в отличии от expiraion\_offset=&quot;3m&quot; означает дату истечения не ровно через три месяца (день в день), а истечение в следущем квартале, т.е. день может точно не совпадать, главное, чтобы разница в месяцах была равна трем.
+4. **expiration\_offset**: almost identical to the strike\_ffset attribute. In addition to lines of symbols &quot;+&quot; and &quot;-&quot; may contain a specific offset in the form &quot;[N]{d,m,q,y}&quot;, where N is a natural number (can be omitted, by default it is equal to one), &quot;d&quot; - day, &quot;m&quot; - month, &quot;q&quot; - quarter, &quot;y&quot; - year. Note, что expiraion\_offset=&quot;q&quot; Unlike expiraion\_offset=&quot;3m&quot; means the expiration date is not exactly three months (day to day), but the expiration in the next quarter, i.e. the day may not exactly coincide, the main thing is that the difference in months is equal to three.
 
-XML-ресурс с описанием типов комбинаций расположен в репозитории.
+XML-a resource describing the types of combinations is located in the repository.
 
-## Формат ввода вывода
+## Input output format
 
- Первая строка содержит число N - количество компонент (2 ≤ N ≤ 100000). Далее в N строках идет описание компонент:
+ The first line contains the number N - the number of components (2 ≤ N ≤ 100000). Then in N lines there is a description of the components:
 
-type weight expiration strike, где type - символ &quot;C&quot;, &quot;P&quot;, &quot;O&quot;, &quot;F&quot;, &quot;U&quot;, weight - вес компоненты, expiration - дата исполнения в формате yyyy-mm-dd, strike - цена исполнения. Цена исполнения задается только для опционов.
+type weight expiration strike, где type - символ &quot;C&quot;, &quot;P&quot;, &quot;O&quot;, &quot;F&quot;, &quot;U&quot;, weight - of component, expiration - date of expiration if format yyyy-mm-dd, strike - execution price. The strike price is set only for options.
 
- Если комбинация была классифицирована в первой строке вывести полное имя типа комбинации. В следующих строках следует вывести перестановку чисел от 1 до N - порядок компонент, в котором их следует рассматривать (согласно порядку описанному в ресурсе).
+ If the combination was classified on the first line, print the full name of the combination type. The following lines should contain the permutation of numbers from 1 to N - the order of the components in which they should be considered (according to the order described in the resource).
 
- Если комбинация не была классифицирована следует вывести одну строку - &quot;Unclassified&quot;.
+ If the combination was not classified, you should output one line - &quot;Unclassified&quot;.
 
-Eсли не удается однозначно определить тип комбинации, то приоритет имеет тот тип, что описан в ресурсе раньше.
+If it is not possible to unambiguously determine the type of combination, then the type that is described in the resource earlier has priority.
 
-## Пример
+## Example
 
-| **Ввод** | **Вывод** |
+| **Input** | **Output** |
 | --- | --- |
 | 2<br>P 1.0 100 2013-10-19<br>C 1.0 100 2013-10-19 | Straddle<br>2<br>1 |
 | 3<br>F 1.0 2013-10-19<br>F -2.0 2013-11-16<br>F 1.0 2013-12-21 | Future butterfly<br>1<br>2<br>3|
 | 2<br>P 1.0 100 2013-10-18<br>C 1.0 100 2013-10-19 | Unclassified |
 
-## Разбор XML
-Можно использовать стороннюю библиотеку для разбора XML, например, [Pugixml](https://pugixml.org/) или [LibXML2](http://xmlsoft.org/).
-
-Нужно либо подключить такую библиотеку как Git submodule, либо положить её исходники в репозиторий. В обоих случаях каталог с библиотекой должен называться
-`xml` и содержать корректный проект CMake, а добавление нужно произвести отдельным коммитом в ветку `master`, до создания ветки с решением задачи.
-В CMakeLists.txt нужно раскомментировать строчку `add_library(xml_lib ALIAS xxx)`, где `xxx` заменить на основную цель сборки библиотеки из её проекта CMake.
